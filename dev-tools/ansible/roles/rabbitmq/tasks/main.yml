@@ -54,15 +54,17 @@
   with_items:
     - "{{ rabbitmq_port }}/tcp"
     - "{{ management_plugin_port }}/tcp"
-  become: yes
   when: servicestatus.rc | int == 0
+  become: yes
+ 
 
 - name: Edit /etc/hosts file
   lineinfile: dest=/etc/hosts line="{{ _ip4.stdout }} {{ ansible_fqdn }}"
   notify:
     - restart rabbitmq  
-  become: yes
   when: servicestatus.rc | int == 0
+  become: yes
+ 
 
 - name: Start Rabbitmq server
   service: name=rabbitmq-server state=started enabled=yes
