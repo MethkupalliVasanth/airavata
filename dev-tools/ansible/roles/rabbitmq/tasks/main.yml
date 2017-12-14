@@ -60,9 +60,9 @@
 - name: Edit /etc/hosts file
   lineinfile: dest=/etc/hosts line="{{ _ip4.stdout }} {{ ansible_fqdn }}"
   notify:
-    - restart rabbitmq
-  when: servicestatus.rc | int == 0
+    - restart rabbitmq  
   become: yes
+  when: servicestatus.rc | int == 0
 
 - name: Start Rabbitmq server
   service: name=rabbitmq-server state=started enabled=yes
