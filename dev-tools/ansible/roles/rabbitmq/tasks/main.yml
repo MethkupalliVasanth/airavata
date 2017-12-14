@@ -47,7 +47,7 @@
   # command: dig +short myip.opendns.com @resolver1.opendns.com
   command: hostname -i
   register: _ip4
-  when: servicestatus.rc | int == 0
+
 
 - name: open rabbitmq ports
   firewalld: port={{ item }} zone=public permanent=true state=enabled immediate=yes
@@ -62,7 +62,6 @@
   lineinfile: dest=/etc/hosts line="{{ _ip4.stdout }} {{ ansible_fqdn }}"
   notify:
     - restart rabbitmq  
-  when: servicestatus.rc | int == 0
   become: yes
  
 
