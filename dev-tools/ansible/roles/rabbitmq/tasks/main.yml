@@ -21,13 +21,17 @@
 ---
 ################################################################################
 # Setup and run rabbitmq
-- name: Install erlang latest version
-  yum: name=https://www.rabbitmq.com/releases/erlang/erlang-18.3-1.el7.centos.x86_64.rpm state=present
-  become: yes
 
-- name: Install Rabbitmq rpm
-  yum: name=https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.3/rabbitmq-server-3.6.3-1.noarch.rpm state=present
-  become: yes
+#Install Erlang for RabbitMQ
+- name: Install Erlang .deb package from the internet.
+  apt:
+    deb: http://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+
+#Install RabbitMQ using the deb
+- name: Install RabbitMQ .deb package from the internet.
+  apt:
+    deb: http://www.rabbitmq.com/releases/rabbitmq-server/v3.6.9/rabbitmq-server_3.6.9-1_all.deb
+
 
   # add hostname to /etc/hosts file
 - name: get ip4 address
