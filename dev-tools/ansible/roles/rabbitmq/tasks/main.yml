@@ -32,12 +32,22 @@
   apt:
     deb: http://www.rabbitmq.com/releases/rabbitmq-server/v3.6.9/rabbitmq-server_3.6.9-1_all.deb
 
+- name: check for service status
+    shell: sudo service rabbitmqctl status
+    ignore_errors: true
+    register: servicestatus
+
+- name: Show service service status
+    debug:
+      msg: 'rabbitmq exists.'
+    when: servicestatus.rc | int == 0
 
   # add hostname to /etc/hosts file
 - name: get ip4 address
   # command: dig +short myip.opendns.com @resolver1.opendns.com
   command: hostname -i
   register: _ip4
+  when: servicestatus.rc | int == 0
 
 - name: open rabbitmq ports
   firewalld: port={{ item }} zone=public permanent=true state=enabled immediate=yes
@@ -45,25 +55,30 @@
     - "{{ rabbitmq_port }}/tcp"
     - "{{ management_plugin_port }}/tcp"
   become: yes
+  when: servicestatus.rc | int == 0
 
 - name: Edit /etc/hosts file
   lineinfile: dest=/etc/hosts line="{{ _ip4.stdout }} {{ ansible_fqdn }}"
   notify:
     - restart rabbitmq
+  when: servicestatus.rc | int == 0
   become: yes
 
 - name: Start Rabbitmq server
   service: name=rabbitmq-server state=started enabled=yes
+  when: servicestatus.rc | int == 0
   become: yes
 
 - name: Enable rabbitmq management plugin
   rabbitmq_plugin: names=rabbitmq_management state=enabled
   notify:
     - restart rabbitmq
+  when: servicestatus.rc | int == 0
   become: yes
 
 - name: Create rabbitmq vhost {{ rabbitmq_vhost }}
   rabbitmq_vhost: name="{{ rabbitmq_vhost }}" state=present
+  when: servicestatus.rc | int == 0
   become: yes
 
 - name: Add user {{ rabbitmq_user }} to vhost {{ rabbitmq_vhost }}  and give permission
@@ -75,10 +90,12 @@
                  read_priv=.*
                  write_priv=.*
                  state=present
+  when: servicestatus.rc | int == 0
   become: yes
 
 - name: restart rabbitmq
   service: name=rabbitmq-server state=restarted
+  when: servicestatus.rc | int == 0
   become: yes
 
 ...
